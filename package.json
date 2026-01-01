@@ -1,0 +1,35 @@
+{
+  "name": "school-management-system-nodejs",
+  "version": "1.0.0",
+  "description": "School Management System Backend",
+  "main": "server.ts",
+  "scripts": {
+    "dev": "tsx --env-file=.env --watch src/server.ts",
+    "build": "rm -rf dist && tsc",
+    "start": "node --env-file=.env dist/server.ts"
+  },
+  "keywords": ["school", "management", "system", "backend", "nodejs", "typescript"],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.1.1",
+    "winston": "^3.19.0",
+    "zod": "^4.3.4"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.0.3",
+    "nodemon": "^3.1.11",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
