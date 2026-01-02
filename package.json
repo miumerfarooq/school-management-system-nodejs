@@ -8,7 +8,14 @@
     "build": "rm -rf dist && tsc",
     "start": "node --env-file=.env dist/server.ts"
   },
-  "keywords": ["school", "management", "system", "backend", "nodejs", "typescript"],
+  "keywords": [
+    "school",
+    "management",
+    "system",
+    "backend",
+    "nodejs",
+    "typescript"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",

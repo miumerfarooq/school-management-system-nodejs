@@ -1,14 +1,21 @@
 import { createApp } from "./app";
+import connectDB from "./config/db";
+import { env } from "./config/env";
+import { logger } from "./utils/logger";
 
-const startServer = () => {
+const startServer = async (): Promise<void> => {
   try {
+    await connectDB()
+
     const app = createApp()
 
-    app.listen(process.env.PORT, () => {
-      console.log(`http://localhost:${process.env.PORT}`)
+    app.listen(env.port, () => {
+      logger.info(`🚀 Server running on port ${env.port}`)
+      logger.info(`📝 Environment: ${env.nodeEnv}`)
+      logger.info(`🔗 API Base URL: http://localhost:${env.port}/api/${env.apiVersion}`)
     })
   } catch (error) {
-    console.log(error)
+    logger.error(`❌ Failed to start server: ${error}`)
     process.exit(1)
   }
 }
