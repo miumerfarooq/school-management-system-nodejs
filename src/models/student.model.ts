@@ -1,5 +1,6 @@
-import mongoose, { Schema } from "mongoose"
+import mongoose, { Schema, Types } from "mongoose"
 import { StudentDocument } from "../types/Student"
+import { Gender, StudentStatus } from "../types"
 
 const studentSchema: Schema<StudentDocument> = new Schema({
   userId: {
@@ -14,6 +15,10 @@ const studentSchema: Schema<StudentDocument> = new Schema({
     type: String,
     required: true
   },
+  gender: {
+    type: String,
+    enum: Object.values(Gender)
+  },
   dateOfBirth: {
     type: Date,
     required: true
@@ -22,9 +27,23 @@ const studentSchema: Schema<StudentDocument> = new Schema({
     type: String,
     required: true
   },
+  sectionId: {
+    type: Schema.Types.ObjectId,
+    ref: "Section"
+  },
   enrollmentDate: {
     type: Date,
     default: Date.now
+  },
+  registrationNumber: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  status: {
+    type: String,
+    enum: Object.values(StudentStatus),
+    default: StudentStatus.ACTIVE
   },
   address: {
     type: String,

@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { BaseDocument } from ".";
+import { BaseDocument, ParentRelationship } from ".";
 
 export interface Parent extends BaseDocument {
   userId: Types.ObjectId;
@@ -7,8 +7,8 @@ export interface Parent extends BaseDocument {
   lastName: string;
   email: string;
   phoneNumber: string;
-  address: string;
-  relationship: string; // e.g., "mother", "father", "guardian"
+  address?: string;
+  relationship: ParentRelationship; // e.g., "mother", "father", "guardian"
   students: Types.ObjectId[]; // Array of student IDs this parent is associated with
 }
 

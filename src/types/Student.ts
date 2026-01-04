@@ -1,14 +1,18 @@
 import { Document, Types } from "mongoose";
-import { BaseDocument } from ".";
+import { BaseDocument, Gender, StudentStatus } from ".";
 
 export interface Student extends BaseDocument {
   userId: Types.ObjectId;
   firstName: string;
   lastName: string;
+  gender?: Gender;
   dateOfBirth: Date;
   grade: string;
+  sectionId?: Types.ObjectId; // Reference to Section
   enrollmentDate: Date;
-  address: string;
+  registrationNumber: string;
+  status: StudentStatus;
+  address?: string;
   phoneNumber: string;
   parents: Types.ObjectId[]; // Array of parent IDs
 }

@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose"
 import { UserDocument } from "../types/User"
-import { UserRole } from "../types/Role"
+import { UserRole } from "../types"
 
 const userSchema = new Schema<UserDocument>({
   username: {
@@ -10,6 +10,7 @@ const userSchema = new Schema<UserDocument>({
   email: {
     type: String,
     required: [true, "Email is required"],
+    unique: true,
     trim: true,
     lowercase: true,
     index: true
@@ -29,10 +30,11 @@ const userSchema = new Schema<UserDocument>({
   },
   isActive: {
     type: Boolean,
-    default: false
+    default: true
   },
   refreshToken: {
-    type: String
+    type: String,
+    select: false
   },
   lastLogin: {
     type: Date

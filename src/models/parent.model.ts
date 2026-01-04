@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose"
 import { ParentDocument } from "../types/Parent"
+import { ParentRelationship } from "../types"
 
 const parentSchema = new Schema<ParentDocument>({
   userId: {
@@ -30,7 +31,8 @@ const parentSchema = new Schema<ParentDocument>({
   },
   relationship: {
     type: String,
-    required: true
+    enum: Object.values(ParentRelationship),
+    default: ParentRelationship.FATHER
   },
   students: [
     {
