@@ -6,6 +6,13 @@ const envSchema = z.object({
   API_VERSION: z.string().default('v1'),
 
   DB_URI: z.string(),
+
+  JWT_ACCESS_SECRET: z.string(),
+  JWT_REFRESH_SECRET: z.string(),
+  JWT_ACCESS_EXPIRY: z.string(),
+  JWT_REFRESH_EXPIRY: z.string(),
+  JWT_RESET_PASSWORD_EXPIRY: z.string(),
+  JWT_EMAIL_VERIFY_EXPIRY: z.string(),
 })
 
 const parsed = envSchema.safeParse(process.env)
@@ -22,6 +29,15 @@ const _env = {
 
   mongodb: {
     uri: parsed.data.DB_URI
+  },
+
+  jwt: {
+    accessSecret: parsed.data.JWT_ACCESS_SECRET,
+    refreshSecret: parsed.data.JWT_REFRESH_SECRET,
+    accessExpiry: parsed.data.JWT_ACCESS_EXPIRY,
+    refreshExpiry: parsed.data.JWT_REFRESH_EXPIRY,
+    resetPasswordExpiry: parsed.data.JWT_RESET_PASSWORD_EXPIRY,
+    emailVerifyExpiry: parsed.data.JWT_EMAIL_VERIFY_EXPIRY,
   },
 }
 

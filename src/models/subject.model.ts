@@ -19,6 +19,10 @@ const subjectSchema = new Schema<SubjectDocument>({
   },
   gradeLevel: {
     type: String
+  },
+  isActive: {
+    type: Boolean,
+    default: true
   }
 }, {
   timestamps: true

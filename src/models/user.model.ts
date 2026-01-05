@@ -38,6 +38,10 @@ const userSchema = new Schema<UserDocument>({
   },
   lastLogin: {
     type: Date
+  },
+  isEmailVerified: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true

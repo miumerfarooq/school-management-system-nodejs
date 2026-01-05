@@ -16,11 +16,12 @@ export const createUserSchema = z.object({
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
         'Password must contain at least one uppercase letter, one lowercase letter, and one number'
       ),
-    role: z.enum(UserRole).optional(),
+    role: z.enum(UserRole).default(UserRole.STUDENT),
     profileImage: z.url("Invalid URL").optional(),
     isActive: z.boolean().default(true),
     refreshToken: z.string().optional(),
-    lastLogin: z.date(),
+    lastLogin: z.iso.datetime().optional(),
+    isEmailVerified: z.boolean().default(false)
   })
 })
 
@@ -45,7 +46,8 @@ export const updateUserSchema = z.object({
     profileImage: z.url("Invalid URL").optional(),
     isActive: z.boolean().optional(),
     refreshToken: z.string().optional(),
-    lastLogin: z.date().optional(),
+    lastLogin: z.iso.datetime().optional(),
+    isEmailVerified: z.boolean().optional(),
   })
 })
 
@@ -56,6 +58,6 @@ export const loginUserSchema = z.object({
   }),
 });
 
-export type CreateBody = z.infer<typeof createUserSchema>
-export type UpdateBody = z.infer<typeof updateUserSchema>
-export type LoginBody = z.infer<typeof loginUserSchema>
+export type CreateBody = z.infer<typeof createUserSchema>['body']
+export type UpdateBody = z.infer<typeof updateUserSchema>['body']
+export type LoginBody = z.infer<typeof loginUserSchema>['body']

@@ -7,6 +7,7 @@ export interface Subject extends BaseDocument {
   description?: string;
   department?: string;
   gradeLevel?: string;
+  isActive: boolean;
 }
 
 export interface SubjectDocument extends Subject, Document {}

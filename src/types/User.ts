@@ -12,6 +12,7 @@ export interface User extends BaseDocument {
   isActive: boolean;
   refreshToken?: string;
   lastLogin?: Date;
+  isEmailVerified?: boolean;
 }
 
 // IUserDocument → for actual database operations with Mongoose.

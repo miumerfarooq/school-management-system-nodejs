@@ -1,6 +1,9 @@
-import { Request, Response, Router } from "express";
+import { Request, Response, Router } from "express"
+import authRoutes from "./auth.routes"
 
 const router = Router()
+
+router.use('/auth', authRoutes)
 
 router.get("/health", (_req: Request, res: Response) => {
   res
@@ -8,7 +11,7 @@ router.get("/health", (_req: Request, res: Response) => {
   .json({
     success: true,
     message: 'API is running',
-    timestamp: new Date().toISOString(),
+    timestamp: new Date().toISOString()
   })
 })
 

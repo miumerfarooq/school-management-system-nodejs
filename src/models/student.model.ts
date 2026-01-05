@@ -59,8 +59,7 @@ const studentSchema: Schema<StudentDocument> = new Schema({
       ref: "Parent"
     }
   ],
-},
-{
+}, {
   timestamps: true
 })
 

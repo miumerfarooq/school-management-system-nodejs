@@ -33,3 +33,9 @@ export enum ParentRelationship {
   GUARDIAN = 'guardian',
   OTHER    = 'other'
 }
+
+export interface jwtPayload {
+  _id: Types.ObjectId,
+  email: string,
+  role: UserRole
+}

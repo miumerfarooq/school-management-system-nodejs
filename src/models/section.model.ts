@@ -12,6 +12,10 @@ const sectionSchema = new Schema<SectionDocument>({
   },
   description: {
     type: String
+  },
+  isActive: {
+    type: Boolean,
+    default: true
   }
 }, {
   timestamps: true
