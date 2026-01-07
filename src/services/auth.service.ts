@@ -1,6 +1,7 @@
 import { CONSTANTS } from "../config/constants";
 import User from "../models/user.model";
 import { ApiError } from "../utils/ApiError";
+import { emailService } from "./email.service";
 import { TokenService } from "./token.service";
 
 class AuthService {
@@ -35,9 +36,10 @@ class AuthService {
     })
 
     // Generate email verification token
-    const token = TokenService.generateRefreshToken({ _id: user._id, email: user.email, role: user.role })
+    const token = TokenService.generateRefreshToken({ _id: user._id.toString(), email: user.email, role: user.role })
 
     // Send verification email
+    await emailService.sendVerificationEmail(user.email, token)
 
     return {
       user: userData, // replace with newUser in real implementation
