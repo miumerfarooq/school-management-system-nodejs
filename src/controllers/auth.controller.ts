@@ -1,7 +1,8 @@
-import { NextFunction, Request, Response } from "express"
+import { Request, Response } from "express"
 import { asyncHandler } from "../utils/asyncHandler"
 import authService from "../services/auth.service"
 import { CONSTANTS } from "../config/constants"
+import { ApiResponse } from "../utils/ApiResponse";
 
 const cookieOptions = {
   httpOnly: true,
@@ -12,16 +13,20 @@ const cookieOptions = {
 
 class AuthController {
   // POST /api/v1/auth/register
-  register = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  register = asyncHandler(async (req: Request, res: Response) => {
       const result = await authService.register(req.body)
+
       res
         .status(CONSTANTS.STATUS_CODES.CREATED)
         .cookie('refreshToken', result.token, cookieOptions)
-        .json({
-          success: true,
-          message: "User registered successfully. Please check your email to verify your account.",
-          data: result
-        })
+        .json(
+          new ApiResponse(CONSTANTS.STATUS_CODES.CREATED,
+          {
+            user: result.user,
+            token: result.token
+          },
+          'User registered successfully. Please check your email to verify your account.')
+        )
   })
 }
 

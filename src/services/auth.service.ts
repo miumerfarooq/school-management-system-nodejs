@@ -42,7 +42,7 @@ class AuthService {
     await emailService.sendVerificationEmail(user.email, token)
 
     return {
-      user: userData, // replace with newUser in real implementation
+      user,
       token
     };
   }
