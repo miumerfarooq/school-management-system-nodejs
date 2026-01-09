@@ -14,17 +14,14 @@ const cookieOptions = {
 class AuthController {
   // POST /api/v1/auth/register
   register = asyncHandler(async (req: Request, res: Response) => {
-      const result = await authService.register(req.body)
+      const { user, token } = await authService.register(req.body)
 
       res
         .status(CONSTANTS.STATUS_CODES.CREATED)
-        .cookie('refreshToken', result.token, cookieOptions)
+        .cookie('accessToken', token, cookieOptions)
         .json(
           new ApiResponse(CONSTANTS.STATUS_CODES.CREATED,
-          {
-            user: result.user,
-            token: result.token
-          },
+          { user, token },
           'User registered successfully. Please check your email to verify your account.')
         )
   })

@@ -1,11 +1,15 @@
 import { z } from "zod"
 
 const envSchema = z.object({
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  NODE_ENV: z.enum(['development', 'production']).default('development'),
   PORT: z.string().transform((val) => parseInt(val, 10)).default(3001),
   API_VERSION: z.string().default('v1'),
 
   DB_URI: z.string(),
+
+  BCRYPT_ROUNDS: z.string().default('12'),
+
+  CORS_ORIGIN: z.string(),
 
   JWT_ACCESS_SECRET: z.string(),
   JWT_REFRESH_SECRET: z.string(),
@@ -39,6 +43,14 @@ const _env = {
 
   mongodb: {
     uri: parsed.data.DB_URI
+  },
+
+  bcrypt: {
+    rounds: parseInt(parsed.data.BCRYPT_ROUNDS, 10),
+  },
+
+  cors: {
+    origin: parsed.data.CORS_ORIGIN.split(','),
   },
 
   jwt: {
