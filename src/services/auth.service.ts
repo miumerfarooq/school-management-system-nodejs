@@ -4,7 +4,7 @@ import User from "../models/user.model";
 import { ApiError } from "../utils/ApiError";
 import { emailService } from "./email.service";
 import { TokenService } from "./token.service";
-import brcypt from "bcryptjs";
+import bcrypt from "bcryptjs";
 
 class AuthService {
   async register(userData: any): Promise<any> {
@@ -26,8 +26,8 @@ class AuthService {
     // profile image URL generation logic can be added here
 
     // encrypt password
-    const salt = await brcypt.genSalt(env.bcrypt.rounds);
-    const hashedPassword = await brcypt.hash(password, salt);
+    const salt = await bcrypt.genSalt(env.bcrypt.rounds);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create user
     const user = await User.create({
@@ -42,15 +42,69 @@ class AuthService {
     })
 
     // Generate email verification token
-    const token = TokenService.generateEmailVerifyToken(user._id.toString(), user.email)
+    const verificationToken = TokenService.generateEmailVerifyToken(user._id.toString(), user.email)
 
     // Send verification email
-    await emailService.sendVerificationEmail(user.email, token)
+    await emailService.sendVerificationEmail(user.email, verificationToken)
 
-    return {
-      user,
-      token
-    };
+    return { user }
+  }
+
+  async login(userdata: any): Promise<any> {
+    const { email, password } = userdata
+
+    // Find user with password field
+    const user = await User.findOne({ email }).select('+password')
+
+    if(!user) {
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.UNAUTHORIZED,
+        CONSTANTS.ERROR_CODES.UNAUTHORIZED,
+        CONSTANTS.ERRORS.INVALID_CREDENTIALS
+      )
+    }
+
+    // Check if user is active
+    if(!user.isActive) {
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.FORBIDDEN,
+        CONSTANTS.ERROR_CODES.FORBIDDEN,
+        CONSTANTS.ERRORS.FORBIDDEN
+      )
+    }
+
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(password, user.password)
+
+    if(!isPasswordValid) {
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.UNAUTHORIZED,
+        CONSTANTS.ERROR_CODES.UNAUTHORIZED,
+        CONSTANTS.ERRORS.INVALID_CREDENTIALS
+      )
+    }
+
+    if(!user.isEmailVerified) {
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.FORBIDDEN,
+        CONSTANTS.ERROR_CODES.FORBIDDEN,
+        CONSTANTS.ERRORS.EMAIL_NOT_VERIFIED
+      )
+    }
+
+    // Generate JWT token
+    const accessToken = TokenService.generateAccessToken({
+      _id: user._id.toString(),
+      email: user.email,
+      role: user.role
+    })
+    const refreshToken = TokenService.generateRefreshToken({
+      _id: user._id.toString(),
+      email: user.email,
+      role: user.role
+    })
+
+    return { user, accessToken, refreshToken }
   }
 }
 

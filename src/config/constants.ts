@@ -36,6 +36,7 @@ export const CONSTANTS = {
     VALIDATION_ERROR: 'Validation error',
     SERVER_ERROR: 'Internal server error',
     ROLE_INVALID: 'Invalid role',
+    EMAIL_NOT_VERIFIED: 'Please verify your email address before logging in',
   },
 
   ERROR_CODES: {
