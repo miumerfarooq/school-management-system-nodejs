@@ -35,4 +35,12 @@ export class TokenService {
       { expiresIn: env.jwt.emailVerifyExpiry }
     );
   }
+
+  static verifyAccessToken(token: string): jwtPayload {
+    return jwt.verify(token, env.jwt.accessSecret) as jwtPayload;
+  }
+
+  static verifyRefreshToken(token: string): jwtPayload {
+    return jwt.verify(token, env.jwt.refreshSecret) as jwtPayload;
+  }
 }

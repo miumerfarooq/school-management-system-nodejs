@@ -37,6 +37,7 @@ export const CONSTANTS = {
     SERVER_ERROR: 'Internal server error',
     ROLE_INVALID: 'Invalid role',
     EMAIL_NOT_VERIFIED: 'Please verify your email address before logging in',
+    PERMISSION_DENIED: 'You do not have permission to access this resource',
   },
 
   ERROR_CODES: {

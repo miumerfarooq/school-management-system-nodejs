@@ -1,3 +1,4 @@
+import { Request } from "express";
 import { Types } from "mongoose";
 
 export interface BaseDocument {
@@ -36,7 +37,12 @@ export enum ParentRelationship {
 
 // _id: Types.ObjectId,
 export interface jwtPayload {
-  _id: string,
-  email: string,
-  role: UserRole
+  _id: string;
+  email: string;
+  roles: UserRole[];
+  type?: 'access' | 'refresh' | 'reset-password' | 'email-verify';
+}
+
+export interface AuthRequest extends Request {
+  user?: jwtPayload;
 }

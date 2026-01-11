@@ -96,12 +96,12 @@ class AuthService {
     const accessToken = TokenService.generateAccessToken({
       _id: user._id.toString(),
       email: user.email,
-      role: user.role
+      roles: [user.role]
     })
     const refreshToken = TokenService.generateRefreshToken({
       _id: user._id.toString(),
       email: user.email,
-      role: user.role
+      roles: [user.role]
     })
 
     return { user, accessToken, refreshToken }
