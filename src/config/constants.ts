@@ -38,6 +38,7 @@ export const CONSTANTS = {
     ROLE_INVALID: 'Invalid role',
     EMAIL_NOT_VERIFIED: 'Please verify your email address before logging in',
     PERMISSION_DENIED: 'You do not have permission to access this resource',
+    USER_NOT_FOUND: 'User not found',
   },
 
   ERROR_CODES: {

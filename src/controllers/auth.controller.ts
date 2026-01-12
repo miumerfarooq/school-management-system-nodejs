@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler"
 import authService from "../services/auth.service"
 import { CONSTANTS } from "../config/constants"
 import { ApiResponse } from "../utils/ApiResponse";
+import { AuthRequest } from "../types";
 
 const cookieOptions = {
   httpOnly: true,
@@ -30,13 +31,31 @@ class AuthController {
 
     res
       .status(CONSTANTS.STATUS_CODES.OK)
-      .cookie('accessToken', accessToken, cookieOptions)
+      // .cookie('accessToken', accessToken, cookieOptions)
       .cookie('refreshToken', refreshToken, cookieOptions)
       .json(
         new ApiResponse(
           CONSTANTS.STATUS_CODES.OK,
           { user, accessToken, refreshToken },
           CONSTANTS.SUCCESS.LOGIN
+        )
+      )
+  })
+
+  logout = asyncHandler(async (req: Request, res: Response) => {
+    const userId = (req as AuthRequest).user?._id;
+
+    await authService.logout(userId!);
+
+    res
+      .status(CONSTANTS.STATUS_CODES.OK)
+      .clearCookie('accessToken', cookieOptions)
+      .clearCookie('refreshToken', cookieOptions)
+      .json(
+        new ApiResponse(
+          CONSTANTS.STATUS_CODES.OK,
+          null,
+          CONSTANTS.SUCCESS.LOGOUT
         )
       )
   })

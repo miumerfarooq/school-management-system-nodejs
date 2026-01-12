@@ -104,7 +104,42 @@ class AuthService {
       roles: [user.role]
     })
 
+    // Update user with refresh token and last login
+    user.refreshToken = refreshToken;
+    user.lastLogin = new Date();
+    await user.save();
+
     return { user, accessToken, refreshToken }
+  }
+
+  async logout(userId: string): Promise<void> {
+    // Option 1
+    // await User.findByIdAndUpdate(userId, { refreshToken: null });
+
+    // Option 2
+    // const user = await User.findById(userId)
+
+    // if (!user) {
+    //   throw new ApiError(
+    //     CONSTANTS.STATUS_CODES.NOT_FOUND,
+    //     CONSTANTS.ERROR_CODES.NOT_FOUND,
+    //     CONSTANTS.ERRORS.USER_NOT_FOUND
+    //   )
+    // }
+
+    // user.refreshToken = null
+    // await user.save()
+
+    // Option 3
+    const user = await User.findByIdAndUpdate(userId, { refreshToken: null });
+
+    if (!user) {
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.NOT_FOUND,
+        CONSTANTS.ERROR_CODES.NOT_FOUND,
+        CONSTANTS.ERRORS.USER_NOT_FOUND
+      )
+    }
   }
 }
 
