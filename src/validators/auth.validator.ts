@@ -58,6 +58,27 @@ export const loginUserSchema = z.object({
   }),
 });
 
+export const refreshTokenSchema = z.object({
+  body: z.object({
+    refreshToken: z.string().nonempty('Refresh token is required')
+  }),
+});
+
+export const changePasswordSchema = z.object({
+  body: z.object({
+    currentPassword: z.string().nonempty("Current password is required"),
+    newPassword: z
+      .string({ error: 'New password is required' })
+      .min(8, 'Password must be at least 8 characters')
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        'Password must contain at least one uppercase letter, one lowercase letter, and one number'
+      )
+  })
+})
+
 export type CreateBody = z.infer<typeof createUserSchema>['body']
 export type UpdateBody = z.infer<typeof updateUserSchema>['body']
 export type LoginBody = z.infer<typeof loginUserSchema>['body']
+export type RefreshTokenBody = z.infer<typeof refreshTokenSchema>['body']
+export type ChangePasswordBody = z.infer<typeof changePasswordSchema>['body']

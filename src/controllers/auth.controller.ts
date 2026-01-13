@@ -81,6 +81,23 @@ class AuthController {
         )
       )
   })
+
+  changePassword = asyncHandler(async (req: Request, res: Response) => {
+    const userId = (req as AuthRequest).user?._id;
+    const { currentPassword, newPassword } = req.body;
+
+    await authService.changePassword(userId!, currentPassword, newPassword);
+
+    res
+      .status(CONSTANTS.STATUS_CODES.OK)
+      .json(
+        new ApiResponse(
+          CONSTANTS.STATUS_CODES.OK,
+          {}, // null
+          'Password changed successfully'
+        )
+      )
+  })
 }
 
 export default new AuthController()

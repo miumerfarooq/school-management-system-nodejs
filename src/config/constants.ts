@@ -40,6 +40,8 @@ export const CONSTANTS = {
     PERMISSION_DENIED: 'You do not have permission to access this resource',
     USER_NOT_FOUND: 'User not found',
     USER_CREATION_FAILED: 'Something went wrong while registering the user',
+    INVALID_PASSWORD: 'Current password is incorrect',
+    PASSWORD_MISMATCH: 'New password must be different from the current password',
   },
 
   ERROR_CODES: {

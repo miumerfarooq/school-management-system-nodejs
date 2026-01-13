@@ -224,6 +224,58 @@ class AuthService {
     }
   }
 
+  async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
+    const user = await User.findById(userId).select('+password');
+
+    if (!user) {
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.NOT_FOUND,
+        CONSTANTS.ERROR_CODES.NOT_FOUND,
+        CONSTANTS.ERRORS.USER_NOT_FOUND
+      );
+    }
+
+    // Verify current password
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+
+    if (!isPasswordValid) {
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.UNAUTHORIZED,
+        CONSTANTS.ERROR_CODES.UNAUTHORIZED,
+        CONSTANTS.ERRORS.INVALID_PASSWORD
+      );
+    }
+
+    // Prevent reusing the same password
+    if (currentPassword === newPassword) {
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.BAD_REQUEST,
+        CONSTANTS.ERROR_CODES.PASSWORD_MISMATCH,
+        CONSTANTS.ERRORS.PASSWORD_MISMATCH
+      );
+    }
+
+    // const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    // if (isSamePassword) {
+    //   throw new ApiError(
+    //     CONSTANTS.STATUS_CODES.BAD_REQUEST,
+    //     CONSTANTS.ERROR_CODES.PASSWORD_MISMATCH,
+    //     CONSTANTS.ERRORS.PASSWORD_MISMATCH
+    //   );
+    // }
+
+    // Hash new password before saving
+    const salt = await bcrypt.genSalt(env.bcrypt.rounds)
+    const hashedNewPassword = await bcrypt.hash(newPassword, salt)
+
+    // Update password
+    user.password = hashedNewPassword;
+
+    // Invalidate refresh token(s) so user must re-login
+    // user.refreshToken = null;
+
+    await user.save();
+  }
 }
 
 export default new AuthService();
