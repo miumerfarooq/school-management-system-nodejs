@@ -31,7 +31,7 @@ class AuthController {
 
     res
       .status(CONSTANTS.STATUS_CODES.OK)
-      // .cookie('accessToken', accessToken, cookieOptions)
+      .cookie('accessToken', accessToken, cookieOptions)
       .cookie('refreshToken', refreshToken, cookieOptions)
       .json(
         new ApiResponse(
@@ -54,8 +54,30 @@ class AuthController {
       .json(
         new ApiResponse(
           CONSTANTS.STATUS_CODES.OK,
-          null,
+          {}, // null
           CONSTANTS.SUCCESS.LOGOUT
+        )
+      )
+  })
+
+  refreshToken = asyncHandler(async (req: Request, res: Response) => {
+    const { refreshToken: cookieRefreshToken } = req.cookies; // oldRefreshToken
+    const { refreshToken: bodyRefreshToken } = req.body;
+
+    const incomingRefreshToken = cookieRefreshToken || bodyRefreshToken;
+
+    const { accessToken, refreshToken } = await authService.refreshToken(incomingRefreshToken);
+    //const { accessToken, refreshToken } = await authService.refreshToken(oldRefreshToken);
+
+    res
+      .status(CONSTANTS.STATUS_CODES.OK)
+      .cookie('accessToken', accessToken, cookieOptions)
+      .cookie('refreshToken', refreshToken, cookieOptions)
+      .json(
+        new ApiResponse(
+          CONSTANTS.STATUS_CODES.OK,
+          { accessToken, refreshToken },
+          'Token refreshed successfully'
         )
       )
   })

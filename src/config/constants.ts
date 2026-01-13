@@ -39,6 +39,7 @@ export const CONSTANTS = {
     EMAIL_NOT_VERIFIED: 'Please verify your email address before logging in',
     PERMISSION_DENIED: 'You do not have permission to access this resource',
     USER_NOT_FOUND: 'User not found',
+    USER_CREATION_FAILED: 'Something went wrong while registering the user',
   },
 
   ERROR_CODES: {
@@ -77,6 +78,7 @@ export const CONSTANTS = {
     SERVER_ERROR: 'server_error',
     SERVICE_UNAVAILABLE: 'service_unavailable',
     TIMEOUT: 'timeout',
+    INTERNAL_SERVER_ERROR: 'internal_server_error',
   },
 
   // Success Messages

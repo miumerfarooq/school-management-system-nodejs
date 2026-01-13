@@ -35,11 +35,18 @@ class AuthService {
       email,
       password: hashedPassword,
       role,
-      profileImage: "",
-      isActive: true,
-      lastLogin: new Date(),
-      isEmailVerified: false
+      profileImage: ""
     })
+
+    const createdUser = await User.findById(user._id)
+
+    if (!createdUser) {
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.INTERNAL_SERVER_ERROR,
+        CONSTANTS.ERROR_CODES.INTERNAL_SERVER_ERROR,
+        CONSTANTS.ERRORS.USER_CREATION_FAILED
+      )
+    }
 
     // Generate email verification token
     const verificationToken = TokenService.generateEmailVerifyToken(user._id.toString(), user.email)
@@ -109,10 +116,21 @@ class AuthService {
     user.lastLogin = new Date();
     await user.save();
 
-    return { user, accessToken, refreshToken }
+    const loggedInUser = await User.findById(user._id)
+
+    return { user: loggedInUser, accessToken, refreshToken }
   }
 
   async logout(userId: string): Promise<void> {
+    await User.findByIdAndUpdate(
+      userId,
+      {
+        $unset: {
+          refreshToken: 1 // this removes the field from document
+        }
+      },
+      { new: true }
+    )
     // Option 1
     // await User.findByIdAndUpdate(userId, { refreshToken: null });
 
@@ -131,16 +149,76 @@ class AuthService {
     // await user.save()
 
     // Option 3
-    const user = await User.findByIdAndUpdate(userId, { refreshToken: null });
+    // const user = await User.findByIdAndUpdate(userId, { refreshToken: null });
 
-    if (!user) {
+    // if (!user) {
+    //   throw new ApiError(
+    //     CONSTANTS.STATUS_CODES.NOT_FOUND,
+    //     CONSTANTS.ERROR_CODES.NOT_FOUND,
+    //     CONSTANTS.ERRORS.USER_NOT_FOUND
+    //   )
+    // }
+  }
+
+  async refreshToken2(oldRefreshToken: string): Promise<any> {
+    if (!oldRefreshToken) {
       throw new ApiError(
-        CONSTANTS.STATUS_CODES.NOT_FOUND,
-        CONSTANTS.ERROR_CODES.NOT_FOUND,
-        CONSTANTS.ERRORS.USER_NOT_FOUND
+        CONSTANTS.STATUS_CODES.UNAUTHORIZED,
+        CONSTANTS.ERROR_CODES.INVALID_TOKEN,
+        CONSTANTS.ERRORS.INVALID_TOKEN
       )
     }
+
+    try {
+      const payload = TokenService.verifyRefreshToken(oldRefreshToken)
+
+      if (!payload) {
+        throw new ApiError(
+          CONSTANTS.STATUS_CODES.UNAUTHORIZED,
+          CONSTANTS.ERROR_CODES.INVALID_TOKEN,
+          CONSTANTS.ERRORS.INVALID_TOKEN
+        )
+      }
+
+      const user = await User.findById(payload._id)
+
+      if (!user) {
+        throw new ApiError(
+          CONSTANTS.STATUS_CODES.UNAUTHORIZED,
+          CONSTANTS.ERROR_CODES.UNAUTHORIZED,
+          CONSTANTS.ERRORS.INVALID_TOKEN
+        )
+      }
+
+      if (user.refreshToken !== oldRefreshToken) {
+        throw new ApiError(
+          CONSTANTS.STATUS_CODES.UNAUTHORIZED,
+          CONSTANTS.ERROR_CODES.UNAUTHORIZED,
+          CONSTANTS.ERRORS.INVALID_TOKEN
+        )
+      }
+
+      // Generate new tokens
+      const accessToken = TokenService.generateAccessToken({
+        _id: user._id.toString(),
+        email: user.email,
+        roles: [user.role]
+      });
+      const refreshToken = TokenService.generateRefreshToken({
+        _id: user._id.toString(),
+        email: user.email,
+        roles: [user.role]
+      });
+
+      // Update user with new refresh token
+      user.refreshToken = refreshToken
+      await user.save()
+      return { accessToken, refreshToken }
+    } catch (error) {
+
+    }
   }
+
 }
 
 export default new AuthService();
