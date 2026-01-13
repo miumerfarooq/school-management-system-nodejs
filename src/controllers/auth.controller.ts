@@ -98,6 +98,21 @@ class AuthController {
         )
       )
   })
+
+  getCurrentUser = asyncHandler(async (req: Request, res: Response) => {
+    const userId = (req as AuthRequest).user?._id
+    const user = await authService.getCurrentUser(userId!)
+
+    res
+      .status(CONSTANTS.STATUS_CODES.OK)
+      .json(
+        new ApiResponse(
+          CONSTANTS.STATUS_CODES.OK,
+          user,
+          'User retrieved successfully'
+        )
+      )
+  })
 }
 
 export default new AuthController()
