@@ -160,7 +160,7 @@ class AuthService {
     // }
   }
 
-  async refreshToken2(oldRefreshToken: string): Promise<any> {
+  async refreshToken(oldRefreshToken: string): Promise<any> {
     if (!oldRefreshToken) {
       throw new ApiError(
         CONSTANTS.STATUS_CODES.UNAUTHORIZED,
@@ -213,9 +213,14 @@ class AuthService {
       // Update user with new refresh token
       user.refreshToken = refreshToken
       await user.save()
+
       return { accessToken, refreshToken }
     } catch (error) {
-
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.UNAUTHORIZED,
+        CONSTANTS.ERROR_CODES.INVALID_TOKEN,
+        CONSTANTS.ERRORS.INVALID_TOKEN
+      )
     }
   }
 
