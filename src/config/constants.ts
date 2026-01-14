@@ -42,6 +42,8 @@ export const CONSTANTS = {
     USER_CREATION_FAILED: 'Something went wrong while registering the user',
     INVALID_PASSWORD: 'Current password is incorrect',
     PASSWORD_MISMATCH: 'New password must be different from the current password',
+    INVALID_TOKEN_TYPE: 'Invalid token type',
+    EMAIL_ALREADY_VERIFIED: 'Email is already verified',
   },
 
   ERROR_CODES: {

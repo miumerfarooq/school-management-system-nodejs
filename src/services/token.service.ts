@@ -30,7 +30,7 @@ export class TokenService {
 
   static generateEmailVerifyToken(userId: string, email: string): string {
     return jwt.sign(
-      { userId, email, type: 'email-verify' },
+      { _id: userId, email, type: 'email-verify' },
       env.jwt.accessSecret,
       { expiresIn: env.jwt.emailVerifyExpiry }
     );

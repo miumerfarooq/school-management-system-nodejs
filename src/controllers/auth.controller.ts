@@ -113,6 +113,22 @@ class AuthController {
         )
       )
   })
+
+  verifyEmail = asyncHandler(async (req: Request, res: Response) => {
+    const { token } = req.query;
+
+    await authService.verifyEmail(token as string);
+
+    res
+      .status(CONSTANTS.STATUS_CODES.OK)
+      .json(
+        new ApiResponse(
+          CONSTANTS.STATUS_CODES.OK,
+          {}, // null
+          'Email verified successfully'
+        )
+      )
+  })
 }
 
 export default new AuthController()

@@ -2,6 +2,7 @@ import nodemailer, { Transporter } from "nodemailer"
 import { env } from "../config/env"
 import { logger } from "../utils/logger"
 import { verifyEmailTemplate } from "../emails/templates/verify-email.template"
+import { welcomeEmailTemplate } from "../emails/templates/welcome.template"
 
 export class EmailService {
   private transporter: Transporter | null = null
@@ -23,7 +24,7 @@ export class EmailService {
   }
 
   async sendVerificationEmail(email: string, token: string): Promise<void> {
-    const verificationUrl = `${env.frontendUrl}/auth/verify-email?token=${token}`
+    const verificationUrl = `${env.frontendUrl}/api/${env.apiVersion}/auth/verify-email?token=${token}`
 
     const mailOptions = {
       from: env.email.from,
@@ -33,6 +34,17 @@ export class EmailService {
     }
 
     await this.sendEmail(mailOptions)
+  }
+
+  async sendWelcomeEmail(email: string, name: string): Promise<void> {
+    const mailOptions = {
+      from: env.email.from,
+      to: email,
+      subject: 'Welcome to Our Platform!',
+      html: welcomeEmailTemplate(name),
+    };
+
+    await this.sendEmail(mailOptions);
   }
 
   private async sendEmail(mailOptions: any): Promise<void> {

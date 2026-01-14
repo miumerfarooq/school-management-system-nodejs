@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { UserRole } from "../types";
+import { query } from "winston";
 
 export const createUserSchema = z.object({
   body: z.object({
@@ -56,6 +57,14 @@ export const loginUserSchema = z.object({
     email: z.email("Invalid email address"),
     password: z.string().min(8, "Password must be at least 8 characters"),
   }),
+});
+
+export const verifyEmailSchema = z.object({
+  query: z.object({
+    token: z.string({
+      error: 'Verification token is required'
+    }),
+  })
 });
 
 export const refreshTokenSchema = z.object({

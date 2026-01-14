@@ -276,6 +276,63 @@ class AuthService {
 
     await user.save();
   }
+
+  async getCurrentUser(userId: string): Promise<any> {
+    const user = await User.findById(userId)
+
+    if (!user) {
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.NOT_FOUND,
+        CONSTANTS.ERROR_CODES.NOT_FOUND,
+        CONSTANTS.ERRORS.USER_NOT_FOUND
+      )
+    }
+
+    return user
+  }
+
+  async verifyEmail(token: string): Promise<void> {
+    const payload = TokenService.verifyAccessToken(token);
+
+    if (!payload) {
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.BAD_REQUEST,
+        CONSTANTS.ERROR_CODES.INVALID_TOKEN,
+        CONSTANTS.ERRORS.INVALID_TOKEN
+      );
+    }
+
+    if (payload.type !== 'email-verify') {
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.BAD_REQUEST,
+        CONSTANTS.ERROR_CODES.VALIDATION_ERROR,
+        CONSTANTS.ERRORS.INVALID_TOKEN_TYPE
+      );
+    }
+
+    const user = await User.findById(payload._id);
+
+    if (!user) {
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.NOT_FOUND,
+        CONSTANTS.ERROR_CODES.NOT_FOUND,
+        CONSTANTS.ERRORS.USER_NOT_FOUND
+      );
+    }
+
+    if (user.isEmailVerified) {
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.BAD_REQUEST,
+        CONSTANTS.ERROR_CODES.VALIDATION_ERROR,
+        CONSTANTS.ERRORS.EMAIL_ALREADY_VERIFIED
+      );
+    }
+
+    user.isEmailVerified = true;
+    await user.save();
+
+    await emailService.sendWelcomeEmail(user.email, user.username);
+  }
 }
 
 export default new AuthService();
