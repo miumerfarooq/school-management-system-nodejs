@@ -36,6 +36,14 @@ export class TokenService {
     );
   }
 
+  static generateResetPasswordToken(userId: string, email: string): string {
+    return jwt.sign(
+      { _id: userId, email, type: 'reset-password' },
+      env.jwt.accessSecret,
+      { expiresIn: env.jwt.resetPasswordExpiry }
+    );
+  }
+
   static verifyAccessToken(token: string): jwtPayload {
     return jwt.verify(token, env.jwt.accessSecret) as jwtPayload;
   }

@@ -60,7 +60,7 @@ export const loginUserSchema = z.object({
 });
 
 export const verifyEmailSchema = z.object({
-  query: z.object({
+  body: z.object({
     token: z.string({
       error: 'Verification token is required'
     }),
@@ -86,8 +86,28 @@ export const changePasswordSchema = z.object({
   })
 })
 
+export const forgotPasswordSchema = z.object({
+  body: z.object({
+    email: z.email('Invalid email format'),
+  })
+});
+
+export const resetPasswordSchema = z.object({
+  body: z.object({
+    token: z.string({ error: 'Token is required'}),
+    newPassword: z
+      .string({ error: 'New password is required' })
+      .min(8, 'Password must be at least 8 characters')
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        'Password must contain at least one uppercase letter, one lowercase letter, and one number'
+      )
+  })
+});
+
 export type CreateBody = z.infer<typeof createUserSchema>['body']
 export type UpdateBody = z.infer<typeof updateUserSchema>['body']
 export type LoginBody = z.infer<typeof loginUserSchema>['body']
 export type RefreshTokenBody = z.infer<typeof refreshTokenSchema>['body']
 export type ChangePasswordBody = z.infer<typeof changePasswordSchema>['body']
+export type ForgotPasswordBody = z.infer<typeof forgotPasswordSchema>['body']

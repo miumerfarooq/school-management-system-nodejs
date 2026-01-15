@@ -115,9 +115,26 @@ class AuthController {
   })
 
   verifyEmail = asyncHandler(async (req: Request, res: Response) => {
-    const { token } = req.query;
+    const { token } = req.body;
 
-    await authService.verifyEmail(token as string);
+    await authService.verifyEmail(token as string)
+    //const user = await authService.verifyEmail(token as string);
+
+    res
+      .status(CONSTANTS.STATUS_CODES.OK)
+      .json(
+        new ApiResponse(
+          CONSTANTS.STATUS_CODES.OK,
+          {},// { user },
+          'Email verified successfully. You can now login to your account.'
+        )
+      )
+  })
+
+  forgotPassword = asyncHandler(async (req: Request, res: Response) => {
+    const { email } = req.body;
+
+    await authService.forgotPassword(email);
 
     res
       .status(CONSTANTS.STATUS_CODES.OK)
@@ -125,17 +142,27 @@ class AuthController {
         new ApiResponse(
           CONSTANTS.STATUS_CODES.OK,
           {}, // null
-          'Email verified successfully'
+          'Password reset link sent to your email'
+        )
+      )
+  })
+
+  resetPassword = asyncHandler(async (req: Request, res: Response) => {
+    const { token, newPassword } = req.body
+
+    await authService.resetPassword(token, newPassword)
+
+    res
+      .status(CONSTANTS.STATUS_CODES.OK)
+      .json(
+        new ApiResponse(
+          CONSTANTS.STATUS_CODES.OK,
+          {}, // null
+          'Password reset successfully'
         )
       )
   })
 }
 
 export default new AuthController()
-/**
- * Validate date(req.body)
- * Check user already exits
- * create user
- * generate token
- * send response
- */
+

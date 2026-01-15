@@ -3,6 +3,8 @@ import { env } from "../config/env"
 import { logger } from "../utils/logger"
 import { verifyEmailTemplate } from "../emails/templates/verify-email.template"
 import { welcomeEmailTemplate } from "../emails/templates/welcome.template"
+import { resetPasswordEmailTemplate } from "../emails/templates/reset-password.template"
+import { passwordChangedEmailTemplate } from "../emails/templates/password-changed.template"
 
 export class EmailService {
   private transporter: Transporter | null = null
@@ -24,7 +26,7 @@ export class EmailService {
   }
 
   async sendVerificationEmail(email: string, token: string): Promise<void> {
-    const verificationUrl = `${env.frontendUrl}/api/${env.apiVersion}/auth/verify-email?token=${token}`
+    const verificationUrl = `${env.frontendUrl}/verify-email?token=${token}`
 
     const mailOptions = {
       from: env.email.from,
@@ -36,6 +38,19 @@ export class EmailService {
     await this.sendEmail(mailOptions)
   }
 
+  async sendPasswordResetEmail(email: string, token: string): Promise<void> {
+    const resetUrl = `${env.frontendUrl}/reset-password?token=${token}`;
+
+    const mailOptions = {
+      from: env.email.from,
+      to: email,
+      subject: 'Reset Your Password',
+      html: resetPasswordEmailTemplate(resetUrl, env.jwt.resetPasswordExpiry)
+    };
+
+    await this.sendEmail(mailOptions);
+  }
+
   async sendWelcomeEmail(email: string, name: string): Promise<void> {
     const mailOptions = {
       from: env.email.from,
@@ -43,6 +58,17 @@ export class EmailService {
       subject: 'Welcome to Our Platform!',
       html: welcomeEmailTemplate(name),
     };
+
+    await this.sendEmail(mailOptions);
+  }
+
+  async sendPasswordChangeConfirmationEmail(email: string, name: string, changedAt: string): Promise<void> {
+    const mailOptions = {
+      from: env.email.from,
+      to: email,
+      subject: 'Your Password Has Been Changed',
+      html: passwordChangedEmailTemplate(name, changedAt)
+    }
 
     await this.sendEmail(mailOptions);
   }

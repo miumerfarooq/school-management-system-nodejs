@@ -2,6 +2,7 @@ import { CONSTANTS } from "../config/constants";
 import { env } from "../config/env";
 import User from "../models/user.model";
 import { ApiError } from "../utils/ApiError";
+import { formatDate } from "../utils/dateFormatter";
 import { emailService } from "./email.service";
 import { TokenService } from "./token.service";
 import bcrypt from "bcryptjs";
@@ -291,7 +292,7 @@ class AuthService {
     return user
   }
 
-  async verifyEmail(token: string): Promise<void> {
+  async verifyEmail(token: string): Promise<any> {
     const payload = TokenService.verifyAccessToken(token);
 
     if (!payload) {
@@ -328,10 +329,66 @@ class AuthService {
       );
     }
 
-    user.isEmailVerified = true;
+    user.isEmailVerified = true
+    await user.save()
+
+    // Send welcome email after successful verification
+    await emailService.sendWelcomeEmail(user.email, user.username);
+
+    // return user;
+  }
+
+  async forgotPassword(email: string) {
+    const user = await User.findOne({ email })
+
+    if (!user) {
+      // Silently fail to avoid leaking user existence
+      return
+    }
+
+    const resetToken = TokenService.generateResetPasswordToken(user._id.toString(), user.email)
+
+    await emailService.sendPasswordResetEmail(user.email, resetToken)
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    const payload = TokenService.verifyAccessToken(token);
+
+    if (!payload) {
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.BAD_REQUEST,
+        CONSTANTS.ERROR_CODES.INVALID_TOKEN,
+        CONSTANTS.ERRORS.INVALID_TOKEN
+      );
+    }
+
+    if (payload.type !== 'reset-password') {
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.BAD_REQUEST,
+        CONSTANTS.ERROR_CODES.VALIDATION_ERROR,
+        CONSTANTS.ERRORS.INVALID_TOKEN_TYPE
+      );
+    }
+
+    const user = await User.findById(payload._id);
+
+    if (!user) {
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.NOT_FOUND,
+        CONSTANTS.ERROR_CODES.NOT_FOUND,
+        CONSTANTS.ERRORS.USER_NOT_FOUND
+      );
+    }
+
+    // Hash new password before saving
+    const salt = await bcrypt.genSalt(env.bcrypt.rounds)
+    const hashedNewPassword = await bcrypt.hash(newPassword, salt)
+
+    // Update password
+    user.password = hashedNewPassword;
     await user.save();
 
-    await emailService.sendWelcomeEmail(user.email, user.username);
+    await emailService.sendPasswordChangeConfirmationEmail(user.email, user.username, formatDate(new Date()));
   }
 }
 
