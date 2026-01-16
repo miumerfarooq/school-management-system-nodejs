@@ -11,6 +11,9 @@ const envSchema = z.object({
 
   CORS_ORIGIN: z.string(),
 
+  RATE_LIMIT_WINDOW_MS: z.string().default('900000'), // 15*60*1000 = 15 minutes
+  RATE_LIMIT_MAX_REQUESTS: z.string().default('100'),
+
   JWT_ACCESS_SECRET: z.string(),
   JWT_REFRESH_SECRET: z.string(),
   JWT_ACCESS_EXPIRY: z.string(),
@@ -51,6 +54,11 @@ const _env = {
 
   cors: {
     origin: parsed.data.CORS_ORIGIN.split(','),
+  },
+
+  rateLimit: {
+    windowMs: parseInt(parsed.data.RATE_LIMIT_WINDOW_MS, 10),
+    maxRequests: parseInt(parsed.data.RATE_LIMIT_MAX_REQUESTS, 10),
   },
 
   jwt: {

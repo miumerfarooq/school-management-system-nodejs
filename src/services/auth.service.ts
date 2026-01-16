@@ -338,6 +338,34 @@ class AuthService {
     // return user;
   }
 
+  async resendVerificationEmail(email: string): Promise<void> {
+    const user = await User.findOne({ email })
+
+    // Silently fail to avoid leaking information
+    if (!user) return
+    if (user.isEmailVerified) return
+
+    // if (!user) {
+    //   throw new ApiError(
+    //     CONSTANTS.STATUS_CODES.NOT_FOUND,
+    //     CONSTANTS.ERROR_CODES.NOT_FOUND,
+    //     CONSTANTS.ERRORS.USER_NOT_FOUND
+    //   );
+    // }
+
+    // if (user.isEmailVerified) {
+    //   throw new ApiError(
+    //     CONSTANTS.STATUS_CODES.BAD_REQUEST,
+    //     CONSTANTS.ERROR_CODES.VALIDATION_ERROR,
+    //     CONSTANTS.ERRORS.EMAIL_ALREADY_VERIFIED
+    //   );
+    // }
+
+    const verificationToken = TokenService.generateEmailVerifyToken(user._id.toString(), user.email)
+
+    await emailService.sendVerificationEmail(user.email, verificationToken)
+  }
+
   async forgotPassword(email: string) {
     const user = await User.findOne({ email })
 

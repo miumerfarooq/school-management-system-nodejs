@@ -131,6 +131,22 @@ class AuthController {
       )
   })
 
+  resendVerificationEmail = asyncHandler(async (req: Request, res: Response) => {
+    const { email } = req.body;
+
+    await authService.resendVerificationEmail(email);
+
+    res
+      .status(CONSTANTS.STATUS_CODES.OK)
+      .json(
+        new ApiResponse(
+          CONSTANTS.STATUS_CODES.OK,
+          {}, // null
+          'Verification email resent successfully'
+        )
+      )
+  })
+
   forgotPassword = asyncHandler(async (req: Request, res: Response) => {
     const { email } = req.body;
 
