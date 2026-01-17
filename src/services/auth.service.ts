@@ -72,6 +72,15 @@ class AuthService {
       )
     }
 
+    // Check if account is locked
+    if (user.lockUntil && user.lockUntil > new Date()) {
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.FORBIDDEN,
+        CONSTANTS.ERROR_CODES.FORBIDDEN,
+        "Account is temporarily locked due to multiple failed login attempts."
+      )
+    }
+
     // Check if user is active
     if(!user.isActive) {
       throw new ApiError(
@@ -85,12 +94,24 @@ class AuthService {
     const isPasswordValid = await bcrypt.compare(password, user.password)
 
     if(!isPasswordValid) {
+      user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1
+
+      // Lock account if too many failed attempts
+      if (user.failedLoginAttempts >= 5) {
+        user.lockUntil = new Date(Date.now() + 5 * 60 * 1000); // lock for 5 minutes
+        user.failedLoginAttempts = 0; // reset counter after lock
+      }
+
       throw new ApiError(
         CONSTANTS.STATUS_CODES.UNAUTHORIZED,
         CONSTANTS.ERROR_CODES.UNAUTHORIZED,
         CONSTANTS.ERRORS.INVALID_CREDENTIALS
       )
     }
+
+    // Reset failed attempts on successful login
+    user.failedLoginAttempts = 0;
+    user.lockUntil = null;
 
     if(!user.isEmailVerified) {
       throw new ApiError(
