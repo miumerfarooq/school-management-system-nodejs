@@ -7,6 +7,11 @@ const studentSchema: Schema<StudentDocument> = new Schema({
     type: Schema.Types.ObjectId, ref: "User",
     required: true
   },
+  studentId: {
+    type: Number,
+    required: true,
+    unique: true
+  },
   firstName: {
     type: String,
     required: true
