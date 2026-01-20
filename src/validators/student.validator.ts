@@ -66,4 +66,12 @@ export const createStudentSchema = z.object({
   })
 });
 
+export const getAllStudentsSchema = z.object({
+  query: z.object({
+    page: z.coerce.number().int().positive().optional(),
+    limit: z.coerce.number().int().positive().optional(),
+  })
+});
+
 export type CreateStudentBody = z.infer<typeof createStudentSchema>['body']
+export type GetAllStudentsQuery = z.infer<typeof getAllStudentsSchema>['query']

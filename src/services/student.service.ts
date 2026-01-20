@@ -114,14 +114,33 @@ class StudentService {
     return { student: populatedStudent as StudentDocument }
   }
 
-  async getStudents(): Promise<StudentDocument[]> {
-    const students = await Student.find()
-      .populate('userId', '-password')
-      .populate('sectionId')
-      .populate('parents')
-      .exec()
+  async getAllStudents(options: { page: number; limit: number }): Promise<{ students: StudentDocument[]; total: number; page: number; pages: number }> {
+    const { page, limit } = options
+    const skip = (page - 1) * limit
 
-    return students as StudentDocument[]
+    const [students, total] = await Promise.all([
+      Student.find()
+        .skip(skip)
+        .limit(limit)
+        .populate('userId', '-password')
+        .populate('sectionId')
+        .populate('parents')
+        .sort({ createdAt: -1 })
+        .exec(),
+      Student.countDocuments()
+    ])
+
+    if(!students || students.length === 0) {
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.NOT_FOUND,
+        CONSTANTS.ERROR_CODES.NOT_FOUND,
+        'No students found'
+      )
+    }
+
+    const pages = Math.ceil(total / limit)
+
+    return { students: students as StudentDocument[], total, page, pages }
   }
 }
 
