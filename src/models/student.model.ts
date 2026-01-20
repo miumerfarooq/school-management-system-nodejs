@@ -25,8 +25,7 @@ const studentSchema: Schema<StudentDocument> = new Schema({
     enum: Object.values(Gender)
   },
   dateOfBirth: {
-    type: Date,
-    required: true
+    type: Date
   },
   grade: {
     type: String,
@@ -51,12 +50,10 @@ const studentSchema: Schema<StudentDocument> = new Schema({
     default: StudentStatus.ACTIVE
   },
   address: {
-    type: String,
-    required: true
+    type: String
   },
   phoneNumber: {
-    type: String,
-    required: true
+    type: String
   },
   parents: [
     {
