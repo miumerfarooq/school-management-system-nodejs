@@ -12,7 +12,7 @@ import bcrypt from "bcryptjs"
 import { Types } from "mongoose"
 
 class StudentService {
-  async createStudent(studentData: CreateStudentBody): Promise<{ user: any; student: StudentDocument }> {
+  async createStudent(studentData: CreateStudentBody): Promise<{ student: StudentDocument }> {
     const { email, password, firstName, lastName, registrationNumber, sectionId, parents } = studentData
 
     const userExist = await User.findOne({ email })
@@ -111,7 +111,17 @@ class StudentService {
       .populate('parents')
       .exec()
 
-    return { user, student: populatedStudent as StudentDocument }
+    return { student: populatedStudent as StudentDocument }
+  }
+
+  async getStudents(): Promise<StudentDocument[]> {
+    const students = await Student.find()
+      .populate('userId', '-password')
+      .populate('sectionId')
+      .populate('parents')
+      .exec()
+
+    return students as StudentDocument[]
   }
 }
 

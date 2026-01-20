@@ -10,5 +10,6 @@ const router = Router()
 router.use(authenticate)
 
 router.post('/', authorize('admin'), validate(createStudentSchema), studentController.createStudent)
+router.get('/', authorize('admin', 'teacher'), studentController.getStudents)
 
 export default router

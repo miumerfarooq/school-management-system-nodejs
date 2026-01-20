@@ -6,7 +6,7 @@ import { ApiResponse } from "../utils/ApiResponse"
 
 class StudentController {
   createStudent = asyncHandler(async (req: Request, res: Response) => {
-    const student = await studentService.createStudent(req.body)
+    const { student } = await studentService.createStudent(req.body)
 
     res
       .status(CONSTANTS.STATUS_CODES.CREATED)
@@ -15,6 +15,20 @@ class StudentController {
           CONSTANTS.STATUS_CODES.CREATED,
           student,
           'User created successfully'
+        )
+      )
+  })
+
+  getStudents = asyncHandler(async (req: Request, res: Response) => {
+    const students = await studentService.getStudents()
+
+    res
+      .status(CONSTANTS.STATUS_CODES.OK)
+      .json(
+        new ApiResponse(
+          CONSTANTS.STATUS_CODES.OK,
+          students,
+          'Students retrieved successfully'
         )
       )
   })
