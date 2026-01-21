@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { Gender, StudentStatus } from "../types";
 import Section from "../models/section.model";
+import mongoose from "mongoose";
 
 export const createStudentSchema = z.object({
   body: z.object({
@@ -73,5 +74,15 @@ export const getAllStudentsSchema = z.object({
   })
 });
 
+export const getStudentByIdSchema = z.object({
+  params: z.object({
+    id: z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
+      message: "Invalid student ID", // "Invalid MongoDB ObjectId",
+    }),
+  }),
+});
+
+
 export type CreateStudentBody = z.infer<typeof createStudentSchema>['body']
 export type GetAllStudentsQuery = z.infer<typeof getAllStudentsSchema>['query']
+export type GetStudentByIdParams = z.infer<typeof getStudentByIdSchema>['params']

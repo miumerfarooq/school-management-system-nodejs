@@ -8,7 +8,7 @@ import { ApiError } from "../utils/ApiError"
 import { StudentDocument } from "../types/Student"
 import { CreateStudentBody } from "../validators/student.validator"
 import { UserRole } from "../types"
-import bcrypt from "bcryptjs"
+import { hashPassword } from "../utils/password"
 import { Types } from "mongoose"
 
 class StudentService {
@@ -65,8 +65,7 @@ class StudentService {
     const nextStudentId = (lastStudent?.studentId || 0) + 1
 
     // Encrypt password
-    const salt = await bcrypt.genSalt(env.bcrypt.rounds)
-    const hashedPassword = await bcrypt.hash(password, salt)
+    const hashedPassword = await hashPassword(password)
 
     // Create user
     const user = await User.create({
@@ -141,6 +140,97 @@ class StudentService {
     const pages = Math.ceil(total / limit)
 
     return { students: students as StudentDocument[], total, page, pages }
+  }
+
+  async getStudentById(id: string): Promise<StudentDocument | null> {
+    // Learning multiple ways to fetch student
+
+    // const student = await Student.findById(id)
+    //   .populate('userId', '-password')
+    //   .populate('sectionId')
+    //   .populate('parents')
+    //   .exec()
+
+    const student = await Student.aggregate([
+      // Stage 1: Match by student ID
+      {
+        $match: {
+          _id: new Types.ObjectId(id)
+        }
+      },
+      // Stage 2: Join with users collection
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "studentAccountDetail"
+        }
+      },
+      // Flatten the studentAccountDetail array returned by $lookup into a single object.
+      {
+        $unwind: {
+          path: "$studentAccountDetail",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      // Stage 3: Join with sections collection
+      {
+        $lookup: {
+          from: "sections",
+          localField: "sectionId",
+          foreignField: "_id",
+          as: "sectionDetail"
+        }
+      },
+      // Flatten the sectionDetail array returned by $lookup into a single object.
+      // $arrayElemAt picks the first element (index 0) so instead of sectionDetail: [{}],
+      // you get sectionDetail: {} directly.
+      {
+        $addFields: {
+          sectionDetail: {
+            $arrayElemAt: ["$sectionDetail", 0]
+          }
+        }
+      },
+      // Stage 4: Join with parents collection
+      {
+        $lookup: {
+          from: "parents",
+          localField: "parents",
+          foreignField: "_id",
+          as: "parentDetails"
+        }
+      },
+      {
+        $addFields: {
+          parentDetails: {
+            $arrayElemAt: ["$parentDetails", 0]
+          }
+        }
+      },
+      // Stage 5: Optional projection to keep fields and hide sensitive fields
+      {
+        $project: {
+          // parentDetails: 1,
+          "studentAccountDetail.password": 0,
+          "studentAccountDetail.isActive": 0,
+          "studentAccountDetail.isEmailVerified": 0,
+          "studentAccountDetail.failedLoginAttempts": 0,
+          "studentAccountDetail.lockUntil": 0
+        }
+      }
+    ])
+
+    if (!student || student.length === 0) {
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.NOT_FOUND,
+        CONSTANTS.ERROR_CODES.NOT_FOUND,
+        'Student not found'
+      )
+    }
+
+    return student[0] as StudentDocument
   }
 }
 

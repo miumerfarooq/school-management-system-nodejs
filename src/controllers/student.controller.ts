@@ -38,6 +38,20 @@ class StudentController {
         )
       )
   })
+
+  getStudentById = asyncHandler(async (req: Request, res: Response) => {
+    const student = await studentService.getStudentById(req.params.id)
+
+    res
+      .status(CONSTANTS.STATUS_CODES.OK)
+      .json(
+        new ApiResponse(
+          CONSTANTS.STATUS_CODES.OK,
+          student,
+          'Student retrieved successfully'
+        )
+      )
+  })
 }
 
 export default new StudentController()

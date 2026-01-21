@@ -5,7 +5,7 @@ import { ApiError } from "../utils/ApiError";
 import { formatDate } from "../utils/dateFormatter";
 import { emailService } from "./email.service";
 import { TokenService } from "./token.service";
-import bcrypt from "bcryptjs";
+import { hashPassword, comparePassword } from "../utils/password";
 
 class AuthService {
   async register(userData: any): Promise<any> {
@@ -27,8 +27,7 @@ class AuthService {
     // profile image URL generation logic can be added here
 
     // encrypt password
-    const salt = await bcrypt.genSalt(env.bcrypt.rounds);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await hashPassword(password);
 
     // Create user
     const user = await User.create({
@@ -91,7 +90,7 @@ class AuthService {
     }
 
     // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.password)
+    const isPasswordValid = await comparePassword(password, user.password)
 
     if(!isPasswordValid) {
       user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1
@@ -258,7 +257,7 @@ class AuthService {
     }
 
     // Verify current password
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    const isPasswordValid = await comparePassword(currentPassword, user.password);
 
     if (!isPasswordValid) {
       throw new ApiError(
@@ -277,7 +276,7 @@ class AuthService {
       );
     }
 
-    // const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    // const isSamePassword = await comparePassword(newPassword, user.password);
     // if (isSamePassword) {
     //   throw new ApiError(
     //     CONSTANTS.STATUS_CODES.BAD_REQUEST,
@@ -287,8 +286,7 @@ class AuthService {
     // }
 
     // Hash new password before saving
-    const salt = await bcrypt.genSalt(env.bcrypt.rounds)
-    const hashedNewPassword = await bcrypt.hash(newPassword, salt)
+    const hashedNewPassword = await hashPassword(newPassword)
 
     // Update password
     user.password = hashedNewPassword;
@@ -430,8 +428,7 @@ class AuthService {
     }
 
     // Hash new password before saving
-    const salt = await bcrypt.genSalt(env.bcrypt.rounds)
-    const hashedNewPassword = await bcrypt.hash(newPassword, salt)
+    const hashedNewPassword = await hashPassword(newPassword)
 
     // Update password
     user.password = hashedNewPassword;
