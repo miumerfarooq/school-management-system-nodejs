@@ -52,6 +52,20 @@ class StudentController {
         )
       )
   })
+
+  updateStudent = asyncHandler(async (req: Request, res: Response) => {
+    const student = await studentService.updateStudent(req.params.id, req.body)
+
+    res
+      .status(CONSTANTS.STATUS_CODES.OK)
+      .json(
+        new ApiResponse(
+          CONSTANTS.STATUS_CODES.OK,
+          student,
+          'Student updated successfully'
+        )
+      )
+  })
 }
 
 export default new StudentController()

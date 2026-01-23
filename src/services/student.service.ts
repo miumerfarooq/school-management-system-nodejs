@@ -164,7 +164,17 @@ class StudentService {
           from: "users",
           localField: "userId",
           foreignField: "_id",
-          as: "studentAccountDetail"
+          as: "studentAccountDetail",
+          pipeline: [
+            {
+              $project: {
+                _id: 1,
+                username: 1,
+                email: 1,
+                role: 1
+              }
+            }
+          ]
         }
       },
       // Flatten the studentAccountDetail array returned by $lookup into a single object.
@@ -210,16 +220,16 @@ class StudentService {
         }
       },
       // Stage 5: Optional projection to keep fields and hide sensitive fields
-      {
-        $project: {
-          // parentDetails: 1,
-          "studentAccountDetail.password": 0,
-          "studentAccountDetail.isActive": 0,
-          "studentAccountDetail.isEmailVerified": 0,
-          "studentAccountDetail.failedLoginAttempts": 0,
-          "studentAccountDetail.lockUntil": 0
-        }
-      }
+      // {
+      //   $project: {
+      //     // parentDetails: 1,
+      //     "studentAccountDetail.password": 0,
+      //     "studentAccountDetail.isActive": 0,
+      //     "studentAccountDetail.isEmailVerified": 0,
+      //     "studentAccountDetail.failedLoginAttempts": 0,
+      //     "studentAccountDetail.lockUntil": 0
+      //   }
+      // }
     ])
 
     if (!student || student.length === 0) {
@@ -231,6 +241,98 @@ class StudentService {
     }
 
     return student[0] as StudentDocument
+  }
+
+  // - Partial<T> is a built-in TypeScript utility type.
+  // - It takes a type T (StudentDocument) and makes all of its properties optional.
+  async updateStudent(id: string, updateData: any): Promise<StudentDocument | null> {
+    // Check if student exists
+    const existingStudent = await Student.findById(id)
+
+    if (!existingStudent) {
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.NOT_FOUND,
+        CONSTANTS.ERROR_CODES.NOT_FOUND,
+        'Student not found'
+      )
+    }
+
+    // Extract email if provided (email belongs to User model, not Student)
+    const { email, ...studentUpdateData } = updateData
+
+    // Validate email uniqueness if email is being updated
+    if (email) {
+      const user = await User.findById(existingStudent.userId)
+      if (email !== user?.email) {
+        const emailExists = await User.findOne({ email })
+        if (emailExists) {
+          throw new ApiError(
+            CONSTANTS.STATUS_CODES.CONFLICT,
+            CONSTANTS.ERROR_CODES.EMAIL_EXISTS,
+            'User with this email already exists'
+          )
+        }
+      }
+    }
+
+    // Validate registration number uniqueness if being updated
+    if (studentUpdateData.registrationNumber && studentUpdateData.registrationNumber !== existingStudent.registrationNumber) {
+      const regNumberExists = await Student.findOne({ registrationNumber: studentUpdateData.registrationNumber })
+      if (regNumberExists) {
+        throw new ApiError(
+          CONSTANTS.STATUS_CODES.CONFLICT,
+          CONSTANTS.ERROR_CODES.DUPLICATE_ENTRY,
+          'Student with this registration number already exists'
+        )
+      }
+    }
+
+    // Validate section exists if being updated
+    if (studentUpdateData.sectionId) {
+      const section = await Section.findById(studentUpdateData.sectionId)
+      if (!section) {
+        throw new ApiError(
+          CONSTANTS.STATUS_CODES.NOT_FOUND,
+          CONSTANTS.ERROR_CODES.NOT_FOUND,
+          'Section not found'
+        )
+      }
+    }
+
+    // Validate all parents exist if being updated
+    if (studentUpdateData.parents && studentUpdateData.parents.length > 0) {
+      const parentIds = studentUpdateData.parents.map((id: any) => new Types.ObjectId(id))
+      const foundParents = await Parent.countDocuments({ _id: { $in: parentIds } })
+      if (foundParents !== studentUpdateData.parents.length) {
+        throw new ApiError(
+          CONSTANTS.STATUS_CODES.NOT_FOUND,
+          CONSTANTS.ERROR_CODES.NOT_FOUND,
+          'One or more parents not found'
+        )
+      }
+    }
+
+    // Update user email if it's being changed
+    if (email) {
+      await User.findByIdAndUpdate(existingStudent.userId, { email })
+    }
+
+    // runValidators: true tells Mongoose to apply schema validation rules to the updateData before saving.
+    const student = await Student.findByIdAndUpdate(id, studentUpdateData, { new: true, runValidators: true })
+      .populate('userId', '-password')
+      .populate('sectionId')
+      .populate('parents')
+      .exec()
+
+    if (!student) {
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.NOT_FOUND,
+        CONSTANTS.ERROR_CODES.NOT_FOUND,
+        'Student update failed'
+      )
+    }
+
+    return student as StudentDocument
   }
 }
 

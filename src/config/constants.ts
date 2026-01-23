@@ -52,6 +52,7 @@ export const CONSTANTS = {
     FORBIDDEN: 'forbidden',
     INVALID_CREDENTIALS: 'invalid_credentials',
     INVALID_TOKEN: 'invalid_token',
+    MISSING_TOKEN: 'missing_token',
     ACCOUNT_INACTIVE: 'account_inactive',
 
     // User & Account

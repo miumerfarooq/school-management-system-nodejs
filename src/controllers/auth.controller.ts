@@ -62,9 +62,14 @@ class AuthController {
 
   refreshToken = asyncHandler(async (req: Request, res: Response) => {
     const { refreshToken: cookieRefreshToken } = req.cookies; // oldRefreshToken
-    const { refreshToken: bodyRefreshToken } = req.body;
+    const { refreshToken: bodyRefreshToken } = req.body || {};
+
+    // console.log('Cookie Refresh Token:', cookieRefreshToken);
+    // console.log('Body Refresh Token:', bodyRefreshToken);
 
     const incomingRefreshToken = cookieRefreshToken || bodyRefreshToken;
+
+    // console.log('Using Incoming Refresh Token:', incomingRefreshToken);
 
     const { accessToken, refreshToken } = await authService.refreshToken(incomingRefreshToken);
     //const { accessToken, refreshToken } = await authService.refreshToken(oldRefreshToken);

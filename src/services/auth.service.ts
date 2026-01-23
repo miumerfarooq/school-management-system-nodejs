@@ -197,25 +197,32 @@ class AuthService {
         throw new ApiError(
           CONSTANTS.STATUS_CODES.UNAUTHORIZED,
           CONSTANTS.ERROR_CODES.INVALID_TOKEN,
-          CONSTANTS.ERRORS.INVALID_TOKEN
+          "Refresh token verification failed: token payload is invalid or corrupted"
         )
       }
 
-      const user = await User.findById(payload._id)
+      const user = await User.findById(payload._id).select('+refreshToken')
 
       if (!user) {
         throw new ApiError(
           CONSTANTS.STATUS_CODES.UNAUTHORIZED,
           CONSTANTS.ERROR_CODES.UNAUTHORIZED,
-          CONSTANTS.ERRORS.INVALID_TOKEN
+          "User associated with refresh token does not exist"
         )
       }
 
       if (user.refreshToken !== oldRefreshToken) {
+        // Debug: Log token comparison
+        // console.log('Token Mismatch Debug:');
+        // console.log('Incoming token length:', oldRefreshToken.length);
+        // console.log('Stored token length:', user.refreshToken?.length);
+        // console.log('Incoming token (first 50 chars):', oldRefreshToken.substring(0, 50));
+        // console.log('Stored token (first 50 chars):', user.refreshToken?.substring(0, 50));
+
         throw new ApiError(
           CONSTANTS.STATUS_CODES.UNAUTHORIZED,
           CONSTANTS.ERROR_CODES.UNAUTHORIZED,
-          CONSTANTS.ERRORS.INVALID_TOKEN
+          "Refresh token does not match the stored token"
         )
       }
 
@@ -240,7 +247,7 @@ class AuthService {
       throw new ApiError(
         CONSTANTS.STATUS_CODES.UNAUTHORIZED,
         CONSTANTS.ERROR_CODES.INVALID_TOKEN,
-        CONSTANTS.ERRORS.INVALID_TOKEN
+        "Failed to refresh token: " + (error as Error).message
       )
     }
   }
