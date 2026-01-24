@@ -11,6 +11,7 @@ router.use(authenticate)
 
 router.post('/', authorize('admin'), validate(createStudentSchema), studentController.createStudent)
 router.get('/', authorize('admin', 'teacher'), validate(getAllStudentsSchema), studentController.getAllStudents)
+router.get('/profile', studentController.getProfile)
 router.get('/:id', authorize('admin', 'teacher', 'student'), validate(getStudentByIdSchema), studentController.getStudentById)
 router.put('/:id', authorize('admin', 'teacher'), validate(updateStudentSchema), studentController.updateStudent)
 router.delete('/:id', authorize('admin'), validate(deleteStudentSchema), studentController.deleteStudent)

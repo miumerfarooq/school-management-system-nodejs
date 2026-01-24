@@ -5,6 +5,7 @@ import { CONSTANTS } from "../config/constants"
 import { ApiResponse } from "../utils/ApiResponse"
 import { TypedRequest } from "../types/request"
 import { CreateStudentBody, GetAllStudentsQuery } from "../validators/student.validator"
+import { AuthRequest } from "../types"
 
 class StudentController {
   createStudent = asyncHandler(async (req: TypedRequest<{}, {}, CreateStudentBody>, res: Response) => {
@@ -70,7 +71,23 @@ class StudentController {
   })
 
   deleteStudent = asyncHandler(async (req: Request, res: Response) => {
-    const student = await studentService.deleteStudent(req.params.id)
+    await studentService.deleteStudent(req.params.id)
+
+    res
+      .status(CONSTANTS.STATUS_CODES.OK)
+      .json(
+        new ApiResponse(
+          CONSTANTS.STATUS_CODES.OK,
+          {},
+          'Student deleted successfully' // 'Student deactivated successfully'
+        )
+      )
+  })
+
+  getProfile = asyncHandler(async (req: Request, res: Response) => {
+    const userId = (req as AuthRequest).user?._id
+
+    const student = await studentService.getProfile(userId!)
 
     res
       .status(CONSTANTS.STATUS_CODES.OK)
@@ -78,7 +95,7 @@ class StudentController {
         new ApiResponse(
           CONSTANTS.STATUS_CODES.OK,
           student,
-          'Student deleted successfully' // 'Student deactivated successfully'
+          'Student profile retrieved successfully'
         )
       )
   })

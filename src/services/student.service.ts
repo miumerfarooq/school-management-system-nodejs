@@ -335,7 +335,7 @@ class StudentService {
     return student as StudentDocument
   }
 
-  async deleteStudent(id: string): Promise<StudentDocument | null> {
+  async deleteStudent(id: string): Promise<void> {
     const student = await Student.findById(id)
 
     if (!student) {
@@ -348,6 +348,24 @@ class StudentService {
 
     await User.findByIdAndUpdate(student.userId, { isActive: false })
     await Student.findByIdAndUpdate(student._id, { status: StudentStatus.INACTIVE })
+
+
+  }
+
+  async getProfile(userId: string): Promise<StudentDocument | null> {
+    const student = await Student.findOne({ userId })
+      .populate('userId', '-password')
+      .populate('sectionId')
+      .populate('parents')
+      .exec()
+
+    if (!student) {
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.NOT_FOUND,
+        CONSTANTS.ERROR_CODES.NOT_FOUND,
+        'Student profile not found'
+      )
+    }
 
     return student as StudentDocument
   }
