@@ -7,9 +7,9 @@ import Section from "../models/section.model"
 import { ApiError } from "../utils/ApiError"
 import { StudentDocument } from "../types/Student"
 import { CreateStudentBody } from "../validators/student.validator"
-import { UserRole } from "../types"
+import { StudentStatus, UserRole } from "../types"
 import { hashPassword } from "../utils/password"
-import { Types } from "mongoose"
+import mongoose, { Types } from "mongoose"
 
 class StudentService {
   async createStudent(studentData: CreateStudentBody): Promise<{ student: StudentDocument }> {
@@ -333,6 +333,54 @@ class StudentService {
     }
 
     return student as StudentDocument
+  }
+
+  async deleteStudent(id: string): Promise<StudentDocument | null> {
+    const session = await mongoose.startSession()
+    session.startTransaction()
+
+    try {
+      //await Student.findByIdAndDelete(id)
+      const student = await Student.findById(id).session(session)
+
+      if (!student) {
+        throw new ApiError(
+          CONSTANTS.STATUS_CODES.NOT_FOUND,
+          CONSTANTS.ERROR_CODES.NOT_FOUND,
+          'Student not found'
+        )
+      }
+
+      // Mark user inactive
+      await User.findByIdAndUpdate(
+        student.userId,
+        { isActive: false },
+        { session }
+      )
+
+      // Mark student inactive
+      await Student.findByIdAndUpdate(
+        student._id,
+        { status: StudentStatus.INACTIVE },
+        { session }
+      )
+
+      // Commit transaction
+      await session.commitTransaction()
+      session.endSession()
+
+      return student as StudentDocument
+    } catch (error) {
+      // Rollback if anything fails
+      await session.abortTransaction()
+      session.endSession()
+      // throw error
+      throw new ApiError(
+        CONSTANTS.STATUS_CODES.INTERNAL_SERVER_ERROR,
+        CONSTANTS.ERROR_CODES.INTERNAL_SERVER_ERROR,
+        'Failed to delete student: ' + (error as Error).message
+      )
+    }
   }
 }
 

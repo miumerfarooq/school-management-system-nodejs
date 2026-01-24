@@ -161,11 +161,20 @@ export const updateStudentSchema = z.object({
   body: updateStudentBodySchema,
 });
 
+export const deleteStudentSchema = z.object({
+  params: z.object({
+    id: z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
+      message: "Invalid student ID",
+    }),
+  }),
+});
+
 export type CreateStudentBody = z.infer<typeof createStudentSchema>['body']
 export type GetAllStudentsQuery = z.infer<typeof getAllStudentsSchema>['query']
 export type GetStudentByIdParams = z.infer<typeof getStudentByIdSchema>['params']
 export type UpdateStudentParams = z.infer<typeof updateStudentSchema>['params']
 export type UpdateStudentBody = z.infer<typeof updateStudentSchema>['body']
+export type DeleteStudentParams = z.infer<typeof deleteStudentSchema>['params']
 
 /*
 # Last export line explanation with example
