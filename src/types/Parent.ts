@@ -9,7 +9,6 @@ export interface Parent extends BaseDocument {
   phoneNumber: string;
   address?: string;
   relationship: ParentRelationship; // e.g., "mother", "father", "guardian"
-  students: Types.ObjectId[]; // Array of student IDs this parent is associated with
 }
 
 export interface ParentDocument extends Parent, Document {}

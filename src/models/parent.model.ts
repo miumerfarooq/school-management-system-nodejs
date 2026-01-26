@@ -33,13 +33,7 @@ const parentSchema = new Schema<ParentDocument>({
     type: String,
     enum: Object.values(ParentRelationship),
     default: ParentRelationship.FATHER
-  },
-  students: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "Student"
-    }
-  ]
+  }
 }, {
   timestamps: true
 })
