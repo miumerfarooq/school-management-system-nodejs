@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 import { BaseDocument, ParentRelationship } from ".";
 
 export interface Parent extends BaseDocument {
-  userId: Types.ObjectId;
+  userId?: Types.ObjectId;
   firstName: string;
   lastName: string;
   email: string;

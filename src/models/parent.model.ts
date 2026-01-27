@@ -5,8 +5,7 @@ import { ParentRelationship } from "../types"
 const parentSchema = new Schema<ParentDocument>({
   userId: {
     type: Schema.Types.ObjectId,
-    ref: "User",
-    required: true
+    ref: "User"
   },
   firstName: {
     type: String,
@@ -23,11 +22,11 @@ const parentSchema = new Schema<ParentDocument>({
   },
   phoneNumber: {
     type: String,
+    unique: true,
     required: true
   },
   address: {
-    type: String,
-    required: true
+    type: String
   },
   relationship: {
     type: String,

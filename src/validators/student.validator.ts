@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { Gender, StudentStatus } from "../types";
-import Section from "../models/section.model";
 import mongoose from "mongoose";
 
 export const createStudentSchema = z.object({
