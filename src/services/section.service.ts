@@ -88,16 +88,13 @@ class SectionService {
     return section
   }
 
-  async updateSection(
-    id: string,
-    updateData: UpdateSectionBody
-  ): Promise<SectionDocument> {
+  async updateSection(id: string, updateData: Partial<UpdateSectionBody>): Promise<SectionDocument> {
     // Check if updating name/grade combination
     if (updateData.name || updateData.grade) {
       const existingSection = await Section.findOne({
         _id: { $ne: id },
-        name: updateData.name || { $exists: true },
-        grade: updateData.grade || { $exists: true },
+        name: updateData.name,
+        grade: updateData.grade,
       })
 
       if (existingSection) {
